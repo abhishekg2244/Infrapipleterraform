@@ -1,0 +1,72 @@
+trigger: none
+
+pool:
+  vmImage: ubuntu-latest 
+    
+stages:
+  - stage: terraformInstall
+    jobs:
+     - job: terraforinstall
+       steps:
+         - task: TerraformInstaller@1
+           inputs:
+             terraformVersion: 'latest'
+
+  - stage: init
+    jobs:
+      - job: terraforminit
+        steps:
+        - task: TerraformTaskV4@4
+          inputs:
+            provider: 'azurerm'
+            command: 'init'
+            workingDirectory: '$(Build.SourcesDirectory)/resourcegroup'
+            backendServiceArm: 'Infrapipleine'
+            backendAzureRmResourceGroupName: 'tfstaterg'
+            backendAzureRmStorageAccountName: 'saccountfstate'
+            backendAzureRmContainerName: 'tfstatefilestore'
+            backendAzureRmKey: 'prod1.terraform.tfstate'
+      
+  - stage: plan
+    jobs:
+      - job: terraformplan
+        steps:    
+        
+        - task: TerraformTaskV4@4
+          inputs:
+            provider: 'azurerm'
+            command: 'init'
+            workingDirectory: '$(Build.SourcesDirectory)/resourcegroup'
+            backendServiceArm: 'Infrapipleine'
+            backendAzureRmResourceGroupName: 'tfstaterg'
+            backendAzureRmStorageAccountName: 'saccountfstate'
+            backendAzureRmContainerName: 'tfstatefilestore'
+            backendAzureRmKey: 'prod1.terraform.tfstate'
+        - task: TerraformTaskV4@4
+          inputs:
+            provider: 'azurerm'
+            command: 'plan' 
+            workingDirectory: '$(Build.SourcesDirectory)/resourcegroup'
+            environmentServiceNameAzureRM: 'Infrapipleine'
+            
+  - stage: apply
+    jobs:
+      - job: terraformapply
+        steps:      
+        
+        - task: TerraformTaskV4@4
+          inputs:
+            provider: 'azurerm'
+            command: 'init'
+            workingDirectory: '$(Build.SourcesDirectory)/resourcegroup'
+            backendServiceArm: 'Infrapipleine'
+            backendAzureRmResourceGroupName: 'tfstaterg'
+            backendAzureRmStorageAccountName: 'saccountfstate'
+            backendAzureRmContainerName: 'tfstatefilestore'
+            backendAzureRmKey: 'prod1.terraform.tfstate'
+        - task: TerraformTaskV4@4
+          inputs:
+            provider: 'azurerm'
+            command: 'apply'
+            workingDirectory: '$(Build.SourcesDirectory)/resourcegroup'
+            environmentServiceNameAzureRM: 'Infrapipleine'
